@@ -1,0 +1,12 @@
+# build output
+dist/
+
+# dependencies
+node_modules/
+
+# lock files (if not publishing app)
+package-lock.json
+yarn.lock
+
+# editor settings
+.vscode/
