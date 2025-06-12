@@ -5,16 +5,15 @@ export class KeyController {
 	}
 
 	bindButton(domSelector, keyCode) {
-		const el =
-			typeof domSelector === "string"
-				? document.querySelector(domSelector)
-				: domSelector;
+		const el = typeof domSelector === 'string'
+		? document.querySelector(domSelector)
+		: domSelector;
 
 		if (!el) return;
 
 		const onStart = (e) => {
 			if (!this.activeKeys.has(keyCode)) {
-				this._fireKey("keydown", keyCode);
+				this._fireKey('keydown', keyCode);
 				this.activeKeys.add(keyCode);
 			}
 			e.preventDefault();
@@ -22,16 +21,16 @@ export class KeyController {
 
 		const onEnd = (e) => {
 			if (this.activeKeys.has(keyCode)) {
-				this._fireKey("keyup", keyCode);
+				this._fireKey('keyup', keyCode);
 				this.activeKeys.delete(keyCode);
 			}
 			e.preventDefault();
 		};
 
-		el.addEventListener("touchstart", onStart, { passive: false });
-		el.addEventListener("mousedown", onStart);
-		el.addEventListener("touchend", onEnd, { passive: false });
-		el.addEventListener("mouseup", onEnd);
+		el.addEventListener('touchstart', onStart, { passive: false });
+		el.addEventListener('mousedown', onStart);
+		el.addEventListener('touchend', onEnd, { passive: false });
+		el.addEventListener('mouseup', onEnd);
 
 		this.bindings.push({ el, keyCode });
 	}
@@ -40,15 +39,23 @@ export class KeyController {
 		const evt = new KeyboardEvent(type, {
 			key: this._keyFromCode(code),
 			code,
-			bubbles: true,
+			bubbles: true
 		});
+
+		const canvas = document.getElementById('canvas');
+		if (canvas) {
+			canvas.dispatchEvent(evt);
+			canvas.focus();
+		}
+
+		window.dispatchEvent(evt);
 		document.dispatchEvent(evt);
 	}
 
 	_keyFromCode(code) {
-		if (code.startsWith("Key")) return code.slice(3).toLowerCase();
-		if (code === "Space") return " ";
-		if (code === "ShiftLeft") return "Shift";
+		if (code.startsWith('Key')) return code.slice(3).toLowerCase();
+		if (code === 'Space') return ' ';
+		if (code === 'ShiftLeft') return 'Shift';
 		return code.toLowerCase();
 	}
 }

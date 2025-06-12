@@ -1,20 +1,50 @@
 {
-  "name": "unreal-html5-touch-controller",
-  "version": "1.0.0",
-  "description": "Touch controller module for Unreal Engine HTML5 projects",
-  "main": "src/index.js",
-  "scripts": {
-    "test": "echo \"No tests yet.\" && exit 0"
-  },
-  "keywords": [
-    "unreal",
-    "ue4",
-    "ue5",
-    "html5",
-    "touch",
-    "controller",
-    "mobile"
-  ],
-  "author": "Darkdreams",
-  "license": "MIT"
+	"name": "unreal-html5-touch-controller",
+	"version": "1.0.0-beta.2",
+	"description": "Touch controller for Unreal Engine HTML5 exports with joystick and gesture support.",
+	"main": "dist/index.es.min.js",
+	"module": "dist/index.es.min.js",
+	"exports": {
+		".": {
+			"default": "./dist/index.es.min.js"
+		}
+	},
+	"unpkg": "dist/index.es.min.js",
+	"jsdelivr": "dist/index.es.min.js",
+	"sideEffects": false,
+	"scripts": {
+		"build": "rollup -c"
+	},
+	"keywords": [
+		"unreal",
+		"html5",
+		"touch",
+		"controller",
+		"joystick",
+		"mobile",
+		"ue4",
+		"ue5",
+		"web"
+	],
+	"files": [
+		"dist",
+		"src",
+		"README.md",
+		"LICENSE"
+	],
+	"author": "Darkdreams",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Darkdreams/unreal-html5-touch-controller.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Darkdreams/unreal-html5-touch-controller/issues"
+	},
+	"homepage": "https://github.com/Darkdreams/unreal-html5-touch-controller#readme",
+	"devDependencies": {
+		"rollup": "^3.29.4",
+		"rollup-plugin-obfuscator": "^1.0.4",
+		"rollup-plugin-terser": "^7.0.2"
+	}
 }
