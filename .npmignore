@@ -1,0 +1,31 @@
+# 忽略源代码（源码保留在 GitHub，不打包进 NPM）
+src/
+
+# 忽略开发配置文件
+.vscode/
+*.log
+*.md~
+*.bak
+*.swp
+*.tmp
+*.DS_Store
+Thumbs.db
+
+# 忽略构建配置
+vite.config.js
+rollup.config.js
+webpack.config.js
+babel.config.js
+
+# 忽略 Git 文件
+.gitignore
+.nvmrc
+
+# 忽略 node_modules（npm 会自动忽略）
+node_modules/
+
+# 忽略测试、文档草稿
+test/
+__tests__/
+coverage/
+README.local.md
