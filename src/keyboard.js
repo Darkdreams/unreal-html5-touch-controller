@@ -9,7 +9,7 @@ export class KeyController {
                 ? document.querySelector(domSelector)
                 : domSelector;
 
-		if (!el) return;
+		    if (!el) return;
 
                 const onStart = (e) => {
                         if (!this.activeKeys.has(keyCode)) {
@@ -33,6 +33,29 @@ export class KeyController {
                 el.addEventListener('mouseup', onEnd);
 
                 this.bindings.push({ el, keyCode, onStart, onEnd });
+        }
+        unbindButton(domSelector) {
+                const el = typeof domSelector === 'string'
+                ? document.querySelector(domSelector)
+                : domSelector;
+
+                if (!el) return;
+
+                this.bindings = this.bindings.filter((binding) => {
+                        if (binding.el !== el) return true;
+
+                        el.removeEventListener('touchstart', binding.onStart, { passive: false });
+                        el.removeEventListener('mousedown', binding.onStart);
+                        el.removeEventListener('touchend', binding.onEnd, { passive: false });
+                        el.removeEventListener('mouseup', binding.onEnd);
+
+                        if (this.activeKeys.has(binding.keyCode)) {
+                                this._fireKey('keyup', binding.keyCode);
+                                this.activeKeys.delete(binding.keyCode);
+                        }
+
+                        return false;
+                });
         }
 
 	_fireKey(type, code) {

@@ -1,5 +1,5 @@
 export class CanvasViewControl {
-        constructor(canvasId, region) {
+        constructor(canvasId, region, { applyBodyStyle = true } = {}) {
                 this.canvas = document.getElementById(canvasId);
 		
 		if (!this.canvas) {
@@ -10,21 +10,25 @@ export class CanvasViewControl {
 		this.viewTouchId = null;
 		this.lastTouch = null;
 
-                // Accept 0~1 number or a custom function
-                this.touchRegion = typeof region === 'function'
-                        ? region
-                        : (x) => x > window.innerWidth * region;
+		// Accept 0~1 number or a custom function
+        this.touchRegion = typeof region === 'function'
+                ? region
+                : (x) => x > window.innerWidth * region;
 
-                this._styleCanvas();
+                this._applyBodyStyle = applyBodyStyle;
+                if (this._applyBodyStyle) {
+                        this._styleCanvas();
+                }
                 this._bindEvents();
         }
 
         _styleCanvas() {
+                this._prevCanvasStyle = {
+                        touchAction: this.canvas.style.touchAction,
+                        tabindex: this.canvas.getAttribute('tabindex')
+                };
                 const body = document.body;
-
-                this._origCanvasTouchAction = this.canvas.style.touchAction;
-                this._origTabIndex = this.canvas.getAttribute('tabindex');
-                this._origBodyStyles = {
+                this._prevBodyStyle = {
                         overflow: body.style.overflow,
                         position: body.style.position,
                         width: body.style.width,
@@ -105,24 +109,26 @@ export class CanvasViewControl {
 
         destroy() {
                 if (!this.canvas) return;
-
-                this.canvas.removeEventListener('touchstart', this._onStart);
-                this.canvas.removeEventListener('touchmove', this._onMove);
-                this.canvas.removeEventListener('touchend', this._onEnd);
-
-                const body = document.body;
-                const b = this._origBodyStyles || {};
-                body.style.overflow = b.overflow || '';
-                body.style.position = b.position || '';
-                body.style.width = b.width || '';
-                body.style.height = b.height || '';
-                body.style.touchAction = b.touchAction || '';
-
-                this.canvas.style.touchAction = this._origCanvasTouchAction || '';
-                if (this._origTabIndex === null || this._origTabIndex === undefined) {
-                        this.canvas.removeAttribute('tabindex');
-                } else {
-                        this.canvas.setAttribute('tabindex', this._origTabIndex);
+                this.canvas.removeEventListener("touchstart", this._touchStartHandler);
+                this.canvas.removeEventListener("touchmove", this._touchMoveHandler);
+                this.canvas.removeEventListener("touchend", this._touchEndHandler);
+                if (this._applyBodyStyle) {
+                        const body = document.body;
+                        if (this._prevBodyStyle) {
+                                body.style.overflow = this._prevBodyStyle.overflow;
+                                body.style.position = this._prevBodyStyle.position;
+                                body.style.width = this._prevBodyStyle.width;
+                                body.style.height = this._prevBodyStyle.height;
+                                body.style.touchAction = this._prevBodyStyle.touchAction;
+                        }
+                        if (this._prevCanvasStyle) {
+                                this.canvas.style.touchAction = this._prevCanvasStyle.touchAction;
+                                if (this._prevCanvasStyle.tabindex !== null) {
+                                        this.canvas.setAttribute('tabindex', this._prevCanvasStyle.tabindex);
+                                } else {
+                                        this.canvas.removeAttribute('tabindex');
+                                }
+                        }
                 }
         }
 }
