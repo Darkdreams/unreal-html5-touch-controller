@@ -1,6 +1,7 @@
 export class JoystickControl {
         constructor(id, { threshold = 15 } = {}) {
                 this.el = document.getElementById(id);
+                this.threshold = threshold;
 
                 if (!this.el) {
                         console.warn(`[JoystickControl] Element not found for id: ${id}`);
