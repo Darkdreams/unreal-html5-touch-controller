@@ -4,36 +4,36 @@ export class KeyController {
 		this.bindings = [];
 	}
 
-	bindButton(domSelector, keyCode) {
-		const el = typeof domSelector === 'string'
-		? document.querySelector(domSelector)
-		: domSelector;
+        bindButton(domSelector, keyCode) {
+                const el = typeof domSelector === 'string'
+                ? document.querySelector(domSelector)
+                : domSelector;
 
 		if (!el) return;
 
-		const onStart = (e) => {
-			if (!this.activeKeys.has(keyCode)) {
-				this._fireKey('keydown', keyCode);
-				this.activeKeys.add(keyCode);
-			}
-			e.preventDefault();
-		};
+                const onStart = (e) => {
+                        if (!this.activeKeys.has(keyCode)) {
+                                this._fireKey('keydown', keyCode);
+                                this.activeKeys.add(keyCode);
+                        }
+                        e.preventDefault();
+                };
 
-		const onEnd = (e) => {
-			if (this.activeKeys.has(keyCode)) {
-				this._fireKey('keyup', keyCode);
-				this.activeKeys.delete(keyCode);
-			}
-			e.preventDefault();
-		};
+                const onEnd = (e) => {
+                        if (this.activeKeys.has(keyCode)) {
+                                this._fireKey('keyup', keyCode);
+                                this.activeKeys.delete(keyCode);
+                        }
+                        e.preventDefault();
+                };
 
-		el.addEventListener('touchstart', onStart, { passive: false });
-		el.addEventListener('mousedown', onStart);
-		el.addEventListener('touchend', onEnd, { passive: false });
-		el.addEventListener('mouseup', onEnd);
+                el.addEventListener('touchstart', onStart, { passive: false });
+                el.addEventListener('mousedown', onStart);
+                el.addEventListener('touchend', onEnd, { passive: false });
+                el.addEventListener('mouseup', onEnd);
 
-		this.bindings.push({ el, keyCode });
-	}
+                this.bindings.push({ el, keyCode, onStart, onEnd });
+        }
 
 	_fireKey(type, code) {
 		const evt = new KeyboardEvent(type, {
@@ -55,7 +55,22 @@ export class KeyController {
 	_keyFromCode(code) {
 		if (code.startsWith('Key')) return code.slice(3).toLowerCase();
 		if (code === 'Space') return ' ';
-		if (code === 'ShiftLeft') return 'Shift';
-		return code.toLowerCase();
-	}
+                if (code === 'ShiftLeft') return 'Shift';
+                return code.toLowerCase();
+        }
+
+        destroy() {
+                for (const { el, onStart, onEnd, keyCode } of this.bindings) {
+                        el.removeEventListener('touchstart', onStart);
+                        el.removeEventListener('mousedown', onStart);
+                        el.removeEventListener('touchend', onEnd);
+                        el.removeEventListener('mouseup', onEnd);
+                }
+
+                for (const key of this.activeKeys) {
+                        this._fireKey('keyup', key);
+                }
+                this.activeKeys.clear();
+                this.bindings = [];
+        }
 }

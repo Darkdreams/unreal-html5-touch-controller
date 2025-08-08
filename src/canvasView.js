@@ -1,6 +1,6 @@
 export class CanvasViewControl {
-	constructor(canvasId, region) {
-		this.canvas = document.getElementById(canvasId);
+        constructor(canvasId, region) {
+                this.canvas = document.getElementById(canvasId);
 		
 		if (!this.canvas) {
 			console.warn(`[UnrealHTML5TouchController] Canvas not found with id "${canvasId}"`);
@@ -10,34 +10,49 @@ export class CanvasViewControl {
 		this.viewTouchId = null;
 		this.lastTouch = null;
 
-		// Accept 0~1 number or a custom function
-    	this.touchRegion = typeof region === 'function'
-      	? region
-      	: (x) => x > window.innerWidth * region;
+                // Accept 0~1 number or a custom function
+                this.touchRegion = typeof region === 'function'
+                        ? region
+                        : (x) => x > window.innerWidth * region;
 
-		this._styleCanvas();
-		this._bindEvents();
-	}
+                this._styleCanvas();
+                this._bindEvents();
+        }
 
-	_styleCanvas() {
-		this.canvas.style.touchAction = 'none';
-		const body = document.body;
-		body.style.overflow = 'hidden';
-		body.style.position = 'fixed';
-		body.style.width = '100%';
-		body.style.height = '100%';
-		body.style.touchAction = 'none';
+        _styleCanvas() {
+                const body = document.body;
 
-		// Enable canvas to receive focus and keyboard events
-		this.canvas.setAttribute('tabindex', '0');
-		this.canvas.focus();
-	}
+                this._origCanvasTouchAction = this.canvas.style.touchAction;
+                this._origTabIndex = this.canvas.getAttribute('tabindex');
+                this._origBodyStyles = {
+                        overflow: body.style.overflow,
+                        position: body.style.position,
+                        width: body.style.width,
+                        height: body.style.height,
+                        touchAction: body.style.touchAction
+                };
 
-	_bindEvents() {
-		this.canvas.addEventListener("touchstart", this._onTouchStart.bind(this), { passive: false });
-		this.canvas.addEventListener("touchmove", this._onTouchMove.bind(this), { passive: false });
-		this.canvas.addEventListener("touchend", this._onTouchEnd.bind(this), { passive: false });
-	}
+                this.canvas.style.touchAction = 'none';
+                body.style.overflow = 'hidden';
+                body.style.position = 'fixed';
+                body.style.width = '100%';
+                body.style.height = '100%';
+                body.style.touchAction = 'none';
+
+                // Enable canvas to receive focus and keyboard events
+                this.canvas.setAttribute('tabindex', '0');
+                this.canvas.focus();
+        }
+
+        _bindEvents() {
+                this._onStart = this._onTouchStart.bind(this);
+                this._onMove = this._onTouchMove.bind(this);
+                this._onEnd = this._onTouchEnd.bind(this);
+
+                this.canvas.addEventListener('touchstart', this._onStart, { passive: false });
+                this.canvas.addEventListener('touchmove', this._onMove, { passive: false });
+                this.canvas.addEventListener('touchend', this._onEnd, { passive: false });
+        }
 
 	_onTouchStart(e) {
 		for (const touch of e.changedTouches) {
@@ -75,9 +90,9 @@ export class CanvasViewControl {
 		e.preventDefault();
 	}
 
-	_fireMouseEvent(type, touch, movementX = 0, movementY = 0) {
-		const evt = new MouseEvent(type, {
-			bubbles: true,
+        _fireMouseEvent(type, touch, movementX = 0, movementY = 0) {
+                const evt = new MouseEvent(type, {
+                        bubbles: true,
 			cancelable: true,
 			clientX: touch.clientX,
 			clientY: touch.clientY,
@@ -85,6 +100,29 @@ export class CanvasViewControl {
 			movementY,
 			buttons: type === 'mouseup' ? 0 : 1
 		});
-		this.canvas.dispatchEvent(evt);
-	}
+                this.canvas.dispatchEvent(evt);
+        }
+
+        destroy() {
+                if (!this.canvas) return;
+
+                this.canvas.removeEventListener('touchstart', this._onStart);
+                this.canvas.removeEventListener('touchmove', this._onMove);
+                this.canvas.removeEventListener('touchend', this._onEnd);
+
+                const body = document.body;
+                const b = this._origBodyStyles || {};
+                body.style.overflow = b.overflow || '';
+                body.style.position = b.position || '';
+                body.style.width = b.width || '';
+                body.style.height = b.height || '';
+                body.style.touchAction = b.touchAction || '';
+
+                this.canvas.style.touchAction = this._origCanvasTouchAction || '';
+                if (this._origTabIndex === null || this._origTabIndex === undefined) {
+                        this.canvas.removeAttribute('tabindex');
+                } else {
+                        this.canvas.setAttribute('tabindex', this._origTabIndex);
+                }
+        }
 }

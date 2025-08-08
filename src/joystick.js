@@ -1,39 +1,43 @@
 export class JoystickControl {
-	constructor(id) {
-		this.el = document.getElementById(id);
+        constructor(id) {
+                this.el = document.getElementById(id);
 
 		if (!this.el) {
 			console.warn(`[JoystickControl] Element not found for id: ${id}`);
 			return;
 		};
 
-		this.origin = null;
-		this.pressed = new Set();
-		this._bind();
-	}
+                this.origin = null;
+                this.pressed = new Set();
+                this._bind();
+        }
 
-	_bind() {
-		this.el.addEventListener('touchstart', e => {
-			if (e.touches.length === 1) {
-				this.origin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-			}
-			e.preventDefault();
-		}, { passive: false });
+        _bind() {
+                this._onStart = (e) => {
+                        if (e.touches.length === 1) {
+                                this.origin = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        }
+                        e.preventDefault();
+                };
 
-		this.el.addEventListener('touchmove', e => {
-			if (!this.origin || e.touches.length !== 1) return;
-			const dx = e.touches[0].clientX - this.origin.x;
-			const dy = e.touches[0].clientY - this.origin.y;
-			this._updateKeys(dx, dy);
-			e.preventDefault();
-		}, { passive: false });
+                this._onMove = (e) => {
+                        if (!this.origin || e.touches.length !== 1) return;
+                        const dx = e.touches[0].clientX - this.origin.x;
+                        const dy = e.touches[0].clientY - this.origin.y;
+                        this._updateKeys(dx, dy);
+                        e.preventDefault();
+                };
 
-		this.el.addEventListener('touchend', e => {
-			this.origin = null;
-			this._updateKeys(0, 0);
-			e.preventDefault();
-		}, { passive: false });
-	}
+                this._onEnd = (e) => {
+                        this.origin = null;
+                        this._updateKeys(0, 0);
+                        e.preventDefault();
+                };
+
+                this.el.addEventListener('touchstart', this._onStart, { passive: false });
+                this.el.addEventListener('touchmove', this._onMove, { passive: false });
+                this.el.addEventListener('touchend', this._onEnd, { passive: false });
+        }
 
 	_fire(type, key) {
 		const evt = new KeyboardEvent(type, {
@@ -67,11 +71,24 @@ export class JoystickControl {
 			}
 		}
 
-		if (dirs.size === 0) {
-			for (const key of this.pressed) {
-				this._fire("keyup", key);
-			}
-			this.pressed.clear();
-		}
-	}
+                if (dirs.size === 0) {
+                        for (const key of this.pressed) {
+                                this._fire("keyup", key);
+                        }
+                        this.pressed.clear();
+                }
+        }
+
+        destroy() {
+                if (!this.el) return;
+
+                this.el.removeEventListener('touchstart', this._onStart);
+                this.el.removeEventListener('touchmove', this._onMove);
+                this.el.removeEventListener('touchend', this._onEnd);
+
+                for (const key of this.pressed) {
+                        this._fire('keyup', key);
+                }
+                this.pressed.clear();
+        }
 }
