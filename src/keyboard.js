@@ -1,8 +1,18 @@
 export class KeyController {
-	constructor() {
-		this.activeKeys = new Set();
-		this.bindings = [];
-	}
+        constructor() {
+                this.activeKeys = new Set();
+                this.bindings = [];
+                this._touchEventOpts = false;
+                try {
+                        const opts = Object.defineProperty({}, 'passive', {
+                                get: () => {
+                                        this._touchEventOpts = { passive: false };
+                                }
+                        });
+                        window.addEventListener('test', null, opts);
+                        window.removeEventListener('test', null, opts);
+                } catch (_) {}
+        }
 
         bindButton(domSelector, keyCode) {
                 const el = typeof domSelector === 'string'
@@ -27,9 +37,9 @@ export class KeyController {
                         e.preventDefault();
                 };
 
-                el.addEventListener('touchstart', onStart, { passive: false });
+                el.addEventListener('touchstart', onStart, this._touchEventOpts);
                 el.addEventListener('mousedown', onStart);
-                el.addEventListener('touchend', onEnd, { passive: false });
+                el.addEventListener('touchend', onEnd, this._touchEventOpts);
                 el.addEventListener('mouseup', onEnd);
 
                 this.bindings.push({ el, keyCode, onStart, onEnd });
@@ -44,9 +54,9 @@ export class KeyController {
                 this.bindings = this.bindings.filter((binding) => {
                         if (binding.el !== el) return true;
 
-                        el.removeEventListener('touchstart', binding.onStart, { passive: false });
+                        el.removeEventListener('touchstart', binding.onStart, false);
                         el.removeEventListener('mousedown', binding.onStart);
-                        el.removeEventListener('touchend', binding.onEnd, { passive: false });
+                        el.removeEventListener('touchend', binding.onEnd, false);
                         el.removeEventListener('mouseup', binding.onEnd);
 
                         if (this.activeKeys.has(binding.keyCode)) {
@@ -84,11 +94,11 @@ export class KeyController {
 
         destroy() {
                 for (const { el, onStart, onEnd, keyCode } of this.bindings) {
-                        el.removeEventListener('touchstart', onStart);
+                        el.removeEventListener('touchstart', onStart, false);
                         el.removeEventListener('mousedown', onStart);
-                        el.removeEventListener('touchend', onEnd);
+                        el.removeEventListener('touchend', onEnd, false);
                         el.removeEventListener('mouseup', onEnd);
-                }
+               }
 
                 for (const key of this.activeKeys) {
                         this._fireKey('keyup', key);
