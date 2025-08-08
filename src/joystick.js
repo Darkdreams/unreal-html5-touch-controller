@@ -1,16 +1,17 @@
 export class JoystickControl {
-	constructor(id) {
-		this.el = document.getElementById(id);
+        constructor(id, { threshold = 15 } = {}) {
+                this.el = document.getElementById(id);
 
-		if (!this.el) {
-			console.warn(`[JoystickControl] Element not found for id: ${id}`);
-			return;
-		};
+                if (!this.el) {
+                        console.warn(`[JoystickControl] Element not found for id: ${id}`);
+                        return;
+                };
 
-		this.origin = null;
-		this.pressed = new Set();
-		this._bind();
-	}
+                this.origin = null;
+                this.pressed = new Set();
+                this.threshold = threshold;
+                this._bind();
+        }
 
 	_bind() {
 		this.el.addEventListener('touchstart', e => {
@@ -45,13 +46,13 @@ export class JoystickControl {
 	}
 
 	_updateKeys(dx, dy) {
-		const threshold = 15;
-		const dirs = new Set();
+                const threshold = this.threshold;
+                const dirs = new Set();
 
-		if (dy < -threshold) dirs.add("w");
-		if (dy > threshold) dirs.add("s");
-		if (dx < -threshold) dirs.add("a");
-		if (dx > threshold) dirs.add("d");
+                if (dy < -threshold) dirs.add("w");
+                if (dy > threshold) dirs.add("s");
+                if (dx < -threshold) dirs.add("a");
+                if (dx > threshold) dirs.add("d");
 
 		for (const key of this.pressed) {
 			if (!dirs.has(key)) {
