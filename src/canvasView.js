@@ -109,9 +109,13 @@ export class CanvasViewControl {
 
         destroy() {
                 if (!this.canvas) return;
-                this.canvas.removeEventListener("touchstart", this._touchStartHandler);
-                this.canvas.removeEventListener("touchmove", this._touchMoveHandler);
-                this.canvas.removeEventListener("touchend", this._touchEndHandler);
+
+                this.canvas.removeEventListener('touchstart', this._onStart);
+                this.canvas.removeEventListener('touchmove', this._onMove);
+                this.canvas.removeEventListener('touchend', this._onEnd);
+
+                this._onStart = this._onMove = this._onEnd = null;
+
                 if (this._applyBodyStyle) {
                         const body = document.body;
                         if (this._prevBodyStyle) {
