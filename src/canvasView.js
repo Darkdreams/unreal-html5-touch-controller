@@ -1,5 +1,5 @@
 export class CanvasViewControl {
-        constructor(canvasId, region, { applyBodyStyle = true } = {}) {
+        constructor(canvasId, region = 0.5, { applyBodyStyle = true } = {}) {
                 this.canvas = document.getElementById(canvasId);
 		
 		if (!this.canvas) {
@@ -10,7 +10,7 @@ export class CanvasViewControl {
 		this.viewTouchId = null;
 		this.lastTouch = null;
 
-		// Accept 0~1 number or a custom function
+                // Accept 0~1 number or a custom function (defaults to 0.5)
         this.touchRegion = typeof region === 'function'
                 ? region
                 : (x) => x > window.innerWidth * region;
@@ -59,13 +59,13 @@ export class CanvasViewControl {
         }
 
 	_onTouchStart(e) {
-		for (const touch of e.changedTouches) {
-			if (touch.clientX > window.innerWidth / 2) {
-				this.viewTouchId = touch.identifier;
-				this.lastTouch = { x: touch.clientX, y: touch.clientY };
-				this._fireMouseEvent('mousedown', touch);
-			}
-		}
+                for (const touch of e.changedTouches) {
+                        if (this.touchRegion(touch.clientX)) {
+                                this.viewTouchId = touch.identifier;
+                                this.lastTouch = { x: touch.clientX, y: touch.clientY };
+                                this._fireMouseEvent('mousedown', touch);
+                        }
+                }
 		e.preventDefault();
 	}
 
