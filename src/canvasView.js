@@ -49,12 +49,13 @@ export class CanvasViewControl {
         }
 
         _bindEvents() {
-                this._touchStartHandler = this._onTouchStart.bind(this);
-                this._touchMoveHandler = this._onTouchMove.bind(this);
-                this._touchEndHandler = this._onTouchEnd.bind(this);
-                this.canvas.addEventListener("touchstart", this._touchStartHandler, { passive: false });
-                this.canvas.addEventListener("touchmove", this._touchMoveHandler, { passive: false });
-                this.canvas.addEventListener("touchend", this._touchEndHandler, { passive: false });
+                this._onStart = this._onTouchStart.bind(this);
+                this._onMove = this._onTouchMove.bind(this);
+                this._onEnd = this._onTouchEnd.bind(this);
+
+                this.canvas.addEventListener('touchstart', this._onStart, { passive: false });
+                this.canvas.addEventListener('touchmove', this._onMove, { passive: false });
+                this.canvas.addEventListener('touchend', this._onEnd, { passive: false });
         }
 
 	_onTouchStart(e) {
@@ -96,13 +97,13 @@ export class CanvasViewControl {
         _fireMouseEvent(type, touch, movementX = 0, movementY = 0) {
                 const evt = new MouseEvent(type, {
                         bubbles: true,
-                        cancelable: true,
-                        clientX: touch.clientX,
-                        clientY: touch.clientY,
-                        movementX,
-                        movementY,
-                        buttons: type === 'mouseup' ? 0 : 1
-                });
+			cancelable: true,
+			clientX: touch.clientX,
+			clientY: touch.clientY,
+			movementX,
+			movementY,
+			buttons: type === 'mouseup' ? 0 : 1
+		});
                 this.canvas.dispatchEvent(evt);
         }
 

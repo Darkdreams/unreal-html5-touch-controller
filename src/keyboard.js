@@ -9,7 +9,7 @@ export class KeyController {
                 ? document.querySelector(domSelector)
                 : domSelector;
 
-                if (!el) return;
+		    if (!el) return;
 
                 const onStart = (e) => {
                         if (!this.activeKeys.has(keyCode)) {
@@ -34,7 +34,6 @@ export class KeyController {
 
                 this.bindings.push({ el, keyCode, onStart, onEnd });
         }
-
         unbindButton(domSelector) {
                 const el = typeof domSelector === 'string'
                 ? document.querySelector(domSelector)
@@ -79,7 +78,22 @@ export class KeyController {
 	_keyFromCode(code) {
 		if (code.startsWith('Key')) return code.slice(3).toLowerCase();
 		if (code === 'Space') return ' ';
-		if (code === 'ShiftLeft') return 'Shift';
-		return code.toLowerCase();
-	}
+                if (code === 'ShiftLeft') return 'Shift';
+                return code.toLowerCase();
+        }
+
+        destroy() {
+                for (const { el, onStart, onEnd, keyCode } of this.bindings) {
+                        el.removeEventListener('touchstart', onStart);
+                        el.removeEventListener('mousedown', onStart);
+                        el.removeEventListener('touchend', onEnd);
+                        el.removeEventListener('mouseup', onEnd);
+                }
+
+                for (const key of this.activeKeys) {
+                        this._fireKey('keyup', key);
+                }
+                this.activeKeys.clear();
+                this.bindings = [];
+        }
 }
